@@ -21,6 +21,8 @@ class BannerRepository implements BannerRepositoryInterface
     {
         $banner = new Banner($data);
         $banner->image = $data['image']->store('assets/banners', 'public');
+        $banner->title = $data['title'];
+        $banner->description = $data['description'];
         $banner->save();
 
         return $banner;
@@ -30,6 +32,8 @@ class BannerRepository implements BannerRepositoryInterface
     {
         $banner = Banner::find($id);
         $banner->image = $data['image']->store('assets/banners', 'public');
+        $banner->title = $data['title'];
+        $banner->description = $data['description'];
         $banner->save();
 
         return $banner;

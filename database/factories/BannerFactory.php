@@ -19,6 +19,8 @@ class BannerFactory extends Factory
     {
         return [
             'image' => UploadedFile::fake()->image('banner.jpg'),
+            'title' => $this->faker->sentence,
+            'description' => $this->faker->paragraph,
         ];
     }
 }

@@ -15,6 +15,8 @@ class UpdateBannerRequest extends FormRequest
     {
         return [
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'title' => 'required|string|max:225',
+            'description' => 'required|string|max:225',
         ];
     }
 }
