@@ -16,18 +16,8 @@ class PropertyAmenity extends Model
         'name',
     ];
 
-    protected $appends = ['properties_count'];
-
-
     public function properties()
     {
         return $this->belongsToMany(Property::class, 'property_amenity_pivot');
-    }
-
-
-
-    public function getPropertiesCountAttribute()
-    {
-        return $this->properties->count();
     }
 }

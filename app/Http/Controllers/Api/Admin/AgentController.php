@@ -38,8 +38,30 @@ class AgentController extends Controller
      */
     public function store(StoreAgentRequest $request)
     {
+        $request = $request->validated();
+
+        $code = $request['code'];
+        if ($code == 'AUTO') {
+            $tryCount = 1;
+            do {
+                $code = $this->agentRepository->generateCode($tryCount);
+                $tryCount++;
+            } while (! $this->agentRepository->isUniqueCode($code));
+            $request['code'] = $code;
+        }
+
+        $slug = $request['slug'];
+        if ($request['slug'] == '') {
+            $tryCount = 1;
+            do {
+                $slug = $this->agentRepository->generateSlug($code, $request['name'], $tryCount);
+                $tryCount++;
+            } while (! $this->agentRepository->isUniqueSlug($slug));
+            $request['slug'] = $slug;
+        }
+
         try {
-            $agents = $this->agentRepository->createAgent($request->all());
+            $agents = $this->agentRepository->createAgent($request);
 
             return ResponseHelper::jsonResponse(true, 'Agents created successfully', new AgentResource($agents), 201);
         } catch (\Exception $e) {
@@ -55,7 +77,22 @@ class AgentController extends Controller
         try {
             $agent = $this->agentRepository->getAgentById($id);
 
-            if (!$agent) {
+            if (! $agent) {
+                return ResponseHelper::jsonResponse(false, 'Agent not found', [], 404);
+            }
+
+            return ResponseHelper::jsonResponse(true, 'Agent retrieved successfully', new AgentResource($agent), 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), [], 500);
+        }
+    }
+
+    public function getAgentBySlug(string $slug)
+    {
+        try {
+            $agent = $this->agentRepository->getAgentBySlug($slug);
+
+            if (! $agent) {
                 return ResponseHelper::jsonResponse(false, 'Agent not found', [], 404);
             }
 
@@ -70,10 +107,32 @@ class AgentController extends Controller
      */
     public function update(UpdateAgentRequest $request, string $id)
     {
-        try {
-            $this->agentRepository->updateAgent($request->all(), $id);
+        $request = $request->validated();
 
-            return ResponseHelper::jsonResponse(true, 'Agents updated successfully', [], 200);
+        $code = $request['code'];
+        if ($code == 'AUTO') {
+            $tryCount = 1;
+            do {
+                $code = $this->agentRepository->generateCode($tryCount);
+                $tryCount++;
+            } while (! $this->agentRepository->isUniqueCode($code, $id));
+            $request['code'] = $code;
+        }
+
+        $slug = $request['slug'];
+        if ($request['slug'] == '') {
+            $tryCount = 1;
+            do {
+                $slug = $this->agentRepository->generateSlug($code, $request['name'], $tryCount);
+                $tryCount++;
+            } while (! $this->agentRepository->isUniqueSlug($slug, $id));
+            $request['slug'] = $slug;
+        }
+
+        try {
+            $agent = $this->agentRepository->updateAgent($request, $id);
+
+            return ResponseHelper::jsonResponse(true, 'Agents updated successfully', new AgentResource($agent), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), [], 500);
         }
@@ -88,21 +147,6 @@ class AgentController extends Controller
             $this->agentRepository->deleteAgent($id);
 
             return ResponseHelper::jsonResponse(true, 'Agents deleted successfully', [], 200);
-        } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), [], 500);
-        }
-    }
-
-    public function getAgentBySlug(string $slug)
-    {
-        try {
-            $agent = $this->agentRepository->getAgentBySlug($slug);
-
-            if (!$agent) {
-                return ResponseHelper::jsonResponse(false, 'Agent not found', [], 404);
-            }
-
-            return ResponseHelper::jsonResponse(true, 'Agent retrieved successfully', new AgentResource($agent), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), [], 500);
         }

@@ -17,17 +17,25 @@ class PropertyAmenityRepository implements PropertyAmenityRepositoryInterface
         return PropertyAmenity::find($id);
     }
 
-    public function createPropertyAmenity($data)
+    public function create($data)
     {
-        return PropertyAmenity::create($data);
+        $propertyAmenity = new PropertyAmenity();
+        $propertyAmenity->fill($data);
+        $propertyAmenity->save();
+
+        return $propertyAmenity;
     }
 
-    public function updatePropertyAmenity($data, $id)
+    public function update($data, $id)
     {
-        return PropertyAmenity::find($id)->update($data);
+        $propertyAmenity = PropertyAmenity::find($id);
+        $propertyAmenity->fill($data);
+        $propertyAmenity->save();
+
+        return $propertyAmenity;
     }
 
-    public function deletePropertyAmenity($id)
+    public function delete($id)
     {
         return PropertyAmenity::destroy($id);
     }

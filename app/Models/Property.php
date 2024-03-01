@@ -6,7 +6,6 @@ use App\Traits\UUID;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 
 class Property extends Model
 {
@@ -15,7 +14,6 @@ class Property extends Model
 
     protected $fillable = [
         'title',
-        'slug',
         'description',
         'loc_city',
         'loc_latitude',
@@ -31,6 +29,7 @@ class Property extends Model
         'is_sold',
         'is_rented',
         'offer_type',
+        'slug',
     ];
 
     protected $casts = [
@@ -41,7 +40,10 @@ class Property extends Model
         'is_rented' => 'boolean',
     ];
 
-    protected $appends = ['first_image'];
+    public function agent()
+    {
+        return $this->belongsTo(Agent::class);
+    }
 
     public function propertyAmenities()
     {
@@ -56,11 +58,6 @@ class Property extends Model
     public function propertyTypes()
     {
         return $this->belongsToMany(PropertyType::class, 'property_type_pivot');
-    }
-
-    public function agent()
-    {
-        return $this->belongsTo(Agent::class);
     }
 
     public function floorPlans()
@@ -81,15 +78,5 @@ class Property extends Model
     public function propertyImages()
     {
         return $this->hasMany(PropertyImage::class);
-    }
-
-    public function setCodeAttribute($value)
-    {
-        $this->attributes['code'] = Str::upper(Str::random(10));
-    }
-
-    public function getFirstImageAttribute()
-    {
-        return $this->propertyImages()->first();
     }
 }

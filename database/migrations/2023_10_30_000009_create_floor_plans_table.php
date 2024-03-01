@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('property_id');
             $table->foreign('property_id')->references('id')->on('properties')->onDelete('cascade');
-            $table->string('sort');
+            $table->integer('sort');
             $table->string('title');
             $table->string('image');
             $table->timestamps();

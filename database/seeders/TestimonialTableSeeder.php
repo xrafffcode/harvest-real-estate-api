@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Property;
 use App\Models\Testimonial;
 use Illuminate\Database\Seeder;
 

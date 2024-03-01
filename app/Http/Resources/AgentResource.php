@@ -27,7 +27,8 @@ class AgentResource extends JsonResource
             'twitter' => $this->twitter ?? '',
             'instagram' => $this->instagram ?? '',
             'linkedin' => $this->linkedin ?? '',
-            'avatar_url' => $this->avatar ? asset('storage/' . $this->avatar) : asset('images/avatar.jpg'),
+            'avatar' => $this->avatar,
+            'avatar_url' => $this->avatar ? asset('storage/'.$this->avatar) : asset('images/avatar.jpg'),
             'properties' => $this->properties,
         ];
     }

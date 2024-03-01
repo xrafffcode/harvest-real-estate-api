@@ -2,10 +2,7 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Str;
 
 class StorePropertyCategoryRequest extends FormRequest
 {
@@ -17,9 +14,16 @@ class StorePropertyCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required', 'max:255', 'string',
-            'icon' => 'required', 'max:255', 'string',
-            'slug' => 'required', 'max:255', 'string', 'unique:property_categories,slug',
+            'name' => 'required|max:255|string|unique:property_categories,name',
+            'icon' => 'required|max:255|string',
+            'slug' => 'nullable|max:255|string|unique:property_categories,slug',
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if (! $this->has('slug')) {
+            $this->merge(['slug' => null]);
+        }
     }
 }

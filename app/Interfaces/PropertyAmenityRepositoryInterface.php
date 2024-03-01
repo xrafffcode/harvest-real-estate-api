@@ -8,9 +8,9 @@ interface PropertyAmenityRepositoryInterface
 
     public function getPropertyAmenityById(string $id);
 
-    public function createPropertyAmenity(array $data);
+    public function create(array $data);
 
-    public function updatePropertyAmenity(array $data, string $id);
+    public function update(array $data, string $id);
 
-    public function deletePropertyAmenity(string $id);
+    public function delete(string $id);
 }

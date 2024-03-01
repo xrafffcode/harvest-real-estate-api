@@ -17,17 +17,4 @@ class Testimonial extends Model
         'avatar',
         'testimonial',
     ];
-
-
-    public function setAvatarAttribute($value)
-    {
-        if ($value !== "undefined") {
-            $this->attributes['avatar'] = $value->store('assets/testimonials', 'public');
-        }
-    }
-
-    public function getAvatarUrlAttribute()
-    {
-        return asset('storage/' . $this->avatar);
-    }
 }

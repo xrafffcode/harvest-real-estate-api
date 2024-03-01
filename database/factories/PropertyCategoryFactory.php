@@ -16,7 +16,7 @@ class PropertyCategoryFactory extends Factory
      */
     public function definition(): array
     {
-        $property_categories = [
+        $propertyCategories = [
             'Apartment',
             'House',
             'Land',
@@ -25,9 +25,18 @@ class PropertyCategoryFactory extends Factory
         ];
 
         return [
-            'name' => $property_categories[array_rand($property_categories)],
+            'name' => $propertyCategories[array_rand($propertyCategories)],
             'icon' => $this->faker->word,
             'slug' => $this->faker->slug,
         ];
+    }
+
+    public function setRandomName(): self
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'name' => $this->faker->sentence,
+            ];
+        });
     }
 }

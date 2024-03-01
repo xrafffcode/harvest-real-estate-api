@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Str;
 
 class UpdateAgentRequest extends FormRequest
 {
@@ -15,12 +14,18 @@ class UpdateAgentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
-            'description' => 'required|string',
-            'specialization' => 'required|string',
-            'email' => 'required|email',
-            'phone_number' => 'required|string',
-            'code' => 'string|unique:agents',
+            'code' => 'required|string|max:255|unique:agents,code,'.$this->route('id'),
+            'name' => 'required|max:255|string',
+            'description' => 'required|max:255|string',
+            'specialization' => 'required|max:255|string',
+            'email' => 'required|max:255|email',
+            'phone_number' => 'required|max:255|string',
+            'facebook' => 'nullable|max:255|string',
+            'twitter' => 'nullable|max:255|string',
+            'instagram' => 'nullable|max:255|string',
+            'linkedin' => 'nullable|max:255|string',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'slug' => 'nullable|max:255|string|unique:agents,slug,'.$this->route('id'),
         ];
     }
 
@@ -29,9 +34,8 @@ class UpdateAgentRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $this->merge([
-            'code' => Str::upper(Str::random(10)),
-            'slug' => Str::slug($this->name) . '-' . Str::random(6),
-        ]);
+        if (! $this->has('slug')) {
+            $this->merge(['slug' => null]);
+        }
     }
 }

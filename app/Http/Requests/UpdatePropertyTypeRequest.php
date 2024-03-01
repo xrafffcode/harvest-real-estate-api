@@ -14,8 +14,15 @@ class UpdatePropertyTypeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:property_types,name',
+            'slug' => 'nullable|string|max:255|unique:property_types,slug',
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if (! $this->has('slug')) {
+            $this->merge(['slug' => null]);
+        }
     }
 }

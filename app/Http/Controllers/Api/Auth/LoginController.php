@@ -9,7 +9,7 @@ class LoginController extends Controller
 {
     public function login(Request $request)
     {
-        if (!auth()->attempt($request->only('email', 'password'))) {
+        if (! auth()->attempt($request->only('email', 'password'))) {
             return response()->json([
                 'message' => 'Invalid login details',
             ], 401);

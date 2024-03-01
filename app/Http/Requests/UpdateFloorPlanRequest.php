@@ -14,30 +14,15 @@ class UpdateFloorPlanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'property_id' => 'required', 'max:255', 'string', 'unique:property',
-            'sort' => 'nullable', 'max:255', 'string',
-            'title' => 'required', 'max:255', 'string',
-            'image' => 'required', 'max:255', 'string',
+            'property_id' => 'required|max:255|string|exists:properties,id',
+            'sort' => 'required|integer',
+            'title' => 'required|max:255|string',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
     }
 
-    /**
-     * Get the error messages for the defined validation rules.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'title' => 'Title is requirede',
-        ];
-    }
-
-    /**
-     * Prepare the data for validation.
-     */
     protected function prepareForValidation(): void
     {
-        $this->merge([]);
+
     }
 }

@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('properties', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('title');
-            $table->string('slug')->unique();
             $table->longText('description');
             $table->string('loc_city');
             $table->string('loc_latitude');
@@ -31,6 +30,7 @@ return new class extends Migration
             $table->boolean('is_sold')->default(false);
             $table->boolean('is_rented')->default(false);
             $table->enum('offer_type', ['sale', 'rent']);
+            $table->string('slug')->unique();
             $table->timestamps();
             $table->softDeletes();
         });

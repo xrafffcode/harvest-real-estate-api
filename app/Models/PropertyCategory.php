@@ -15,32 +15,18 @@ class PropertyCategory extends Model
     protected $fillable = [
         'name',
         'icon',
-        'slug'
+        'slug',
     ];
 
     protected $hidden = [
         'pivot',
         'created_at',
         'updated_at',
-        'deleted_at'
-    ];
-
-    protected $appends = [
-        'properties_count'
+        'deleted_at',
     ];
 
     public function properties()
     {
         return $this->belongsToMany(Property::class, 'property_category_pivot');
-    }
-
-    public function propertiesCount()
-    {
-        return $this->belongsToMany(Property::class, 'property_category_pivot')->count();
-    }
-
-    public function getPropertiesCountAttribute()
-    {
-        return $this->propertiesCount();
     }
 }

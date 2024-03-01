@@ -29,4 +29,13 @@ class PropertyTypeFactory extends Factory
             'slug' => $this->faker->slug,
         ];
     }
+
+    public function setRandomName(): self
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'name' => $this->faker->sentence(),
+            ];
+        });
+    }
 }

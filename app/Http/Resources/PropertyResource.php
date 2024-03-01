@@ -30,16 +30,17 @@ class PropertyResource extends JsonResource
             'price_label' => $this->price_label,
             'agent_id' => $this->agent_id,
             'agent' => $this->agent,
-            'is_featured' =>  $this->is_featured,
+            'is_featured' => $this->is_featured,
             'is_active' => $this->is_active,
             'is_sold' => $this->is_sold,
             'is_rented' => $this->is_rented,
             'offer_type' => $this->offer_type,
-            'amenities' => $this->propertyAmenities,
-            'types' => $this->propertyTypes,
-            'categories' => $this->propertyCategories,
-            'images' => $this->propertyImages,
-            'floor_plans' => $this->floorPlans,
+            'property_amenities' => PropertyAmenityResource::collection($this->propertyAmenities),
+            'property_types' => PropertyTypeResource::collection($this->propertyTypes),
+            'property_categories' => PropertyCategoryResource::collection($this->propertyCategories),
+            'property_images' => PropertyImageResource::collection($this->propertyImages),
+            'first_image' => PropertyImageResource::make($this->propertyImages->first()),
+            'property_floor_plans' => FloorPlanResource::collection($this->floorPlans),
         ];
     }
 }

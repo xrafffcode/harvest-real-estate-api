@@ -37,8 +37,10 @@ class TestimonialController extends Controller
      */
     public function store(StoreTestimonialRequest $request)
     {
+        $request = $request->validated();
+
         try {
-            $testimonials = $this->testimonialRepository->createTestimonial($request->all());
+            $testimonials = $this->testimonialRepository->create($request);
 
             return ResponseHelper::jsonResponse(true, 'Testimonials created successfully', new TestimonialResource($testimonials), 201);
         } catch (\Exception $e) {
@@ -54,7 +56,7 @@ class TestimonialController extends Controller
         try {
             $testimonial = $this->testimonialRepository->getTestimonialById($id);
 
-            if (!$testimonial) {
+            if (! $testimonial) {
                 return ResponseHelper::jsonResponse(false, 'Testimonial not found', [], 404);
             }
 
@@ -69,10 +71,12 @@ class TestimonialController extends Controller
      */
     public function update(UpdateTestimonialRequest $request, string $id)
     {
-        try {
-            $testimonials = $this->testimonialRepository->updateTestimonial($request->all(), $id);
+        $request = $request->validated();
 
-            return ResponseHelper::jsonResponse(true, 'Testimonials updated successfully', [], 200);
+        try {
+            $testimonial = $this->testimonialRepository->update($request, $id);
+
+            return ResponseHelper::jsonResponse(true, 'Testimonials updated successfully', new TestimonialResource($testimonial), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), [], 500);
         }
@@ -84,7 +88,7 @@ class TestimonialController extends Controller
     public function destroy(string $id)
     {
         try {
-            $this->testimonialRepository->deleteTestimonial($id);
+            $this->testimonialRepository->delete($id);
 
             return ResponseHelper::jsonResponse(true, 'Testimonials deleted successfully', [], 200);
         } catch (\Exception $e) {

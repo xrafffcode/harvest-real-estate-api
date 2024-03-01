@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('agents', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('slug');
             $table->string('code');
             $table->string('name');
             $table->text('description');
@@ -25,6 +24,7 @@ return new class extends Migration
             $table->string('instagram')->nullable();
             $table->string('linkedin')->nullable();
             $table->string('avatar')->nullable();
+            $table->string('slug');
             $table->timestamps();
             $table->softDeletes();
         });

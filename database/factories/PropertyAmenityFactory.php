@@ -71,7 +71,6 @@ class PropertyAmenityFactory extends Factory
 
         return [
             'name' => $amenities[array_rand($amenities)],
-            'slug' => $this->faker->unique()->slug,
         ];
     }
 }

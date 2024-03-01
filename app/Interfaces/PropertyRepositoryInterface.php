@@ -27,9 +27,9 @@ interface PropertyRepositoryInterface
 
     public function getPropertyCities();
 
-    public function createProperty(array $data);
+    public function create(array $data);
 
-    public function updateProperty(array $data, string $id);
+    public function update(array $data, string $id);
 
     public function updateFeaturedProperty(string $id, bool $featured);
 
@@ -39,7 +39,7 @@ interface PropertyRepositoryInterface
 
     public function updateRentedProperty(string $id, bool $rented);
 
-    public function deleteProperty(string $id);
+    public function delete(string $id);
 
     public function deletePropertyImage(string $id);
 }

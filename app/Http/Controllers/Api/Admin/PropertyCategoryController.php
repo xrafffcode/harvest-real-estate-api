@@ -37,10 +37,22 @@ class PropertyCategoryController extends Controller
      */
     public function store(StorePropertyCategoryRequest $request)
     {
-        try {
-            $propertyCategories = $this->propertyCategoryRepository->createPropertyCategory($request->all());
+        $request = $request->validated();
 
-            return ResponseHelper::jsonResponse(true, 'Property Categories created successfully', new PropertyCategoryResource($propertyCategories), 201);
+        $slug = $request['slug'];
+        if ($request['slug'] == '') {
+            $tryCount = 1;
+            do {
+                $slug = $this->propertyCategoryRepository->generateSlug($request['name'], $tryCount);
+                $tryCount++;
+            } while (! $this->propertyCategoryRepository->isUniqueSlug($slug));
+            $request['slug'] = $slug;
+        }
+
+        try {
+            $propertyCategory = $this->propertyCategoryRepository->create($request);
+
+            return ResponseHelper::jsonResponse(true, 'Property Categories created successfully', new PropertyCategoryResource($propertyCategory), 201);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), [], 500);
         }
@@ -54,7 +66,7 @@ class PropertyCategoryController extends Controller
         try {
             $propertyCategory = $this->propertyCategoryRepository->getPropertyCategoryById($id);
 
-            if (!$propertyCategory) {
+            if (! $propertyCategory) {
                 return ResponseHelper::jsonResponse(false, 'PropertyCategory not found', [], 404);
             }
 
@@ -69,10 +81,22 @@ class PropertyCategoryController extends Controller
      */
     public function update(UpdatePropertyCategoryRequest $request, string $id)
     {
-        try {
-            $this->propertyCategoryRepository->updatePropertyCategory($request->all(), $id);
+        $request = $request->validated();
 
-            return ResponseHelper::jsonResponse(true, 'Property Categories updated successfully', [], 200);
+        $slug = $request['slug'];
+        if ($request['slug'] == '') {
+            $tryCount = 1;
+            do {
+                $slug = $this->propertyCategoryRepository->generateSlug($request['name'], $tryCount);
+                $tryCount++;
+            } while (! $this->propertyCategoryRepository->isUniqueSlug($slug, $id));
+            $request['slug'] = $slug;
+        }
+
+        try {
+            $propertyCategory = $this->propertyCategoryRepository->update($request, $id);
+
+            return ResponseHelper::jsonResponse(true, 'Property Categories updated successfully', new PropertyCategoryResource($propertyCategory), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), [], 500);
         }
@@ -84,7 +108,7 @@ class PropertyCategoryController extends Controller
     public function destroy(string $id)
     {
         try {
-            $this->propertyCategoryRepository->deletePropertyCategory($id);
+            $this->propertyCategoryRepository->delete($id);
 
             return ResponseHelper::jsonResponse(true, 'Property Categories deleted successfully', [], 200);
         } catch (\Exception $e) {

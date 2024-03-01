@@ -62,7 +62,6 @@ Route::prefix('v1')->group(function () {
         Route::post('property_type/{property_type}', [\App\Http\Controllers\Api\Admin\PropertyTypeController::class, 'update']);
         Route::delete('property_type/{property_type}', [\App\Http\Controllers\Api\Admin\PropertyTypeController::class, 'destroy']);
 
-
         Route::post('property_amenity', [\App\Http\Controllers\Api\Admin\PropertyAmenityController::class, 'store']);
         Route::post('property_amenity/{property_amenity}', [\App\Http\Controllers\Api\Admin\PropertyAmenityController::class, 'update']);
         Route::delete('property_amenity/{property_amenity}', [\App\Http\Controllers\Api\Admin\PropertyAmenityController::class, 'destroy']);

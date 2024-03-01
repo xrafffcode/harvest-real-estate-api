@@ -21,14 +21,4 @@ class FloorPlan extends Model
     {
         return $this->belongsTo(Property::class);
     }
-
-    public function setFloorPlanImageAttribute($value)
-    {
-        $this->attributes['image'] = $value->store('assets/floor-plans', 'public');
-    }
-
-    public function getImageAttribute($value)
-    {
-        return asset('storage/' . $value);
-    }
 }

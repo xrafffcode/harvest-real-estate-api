@@ -16,7 +16,6 @@ class PropertyTableSeeder extends Seeder
      */
     public function run(): void
     {
-
         $seedCount = 5;
         for ($i = 0; $i < $seedCount; $i++) {
             $amenity = PropertyAmenity::inRandomOrder()->first();
@@ -32,6 +31,5 @@ class PropertyTableSeeder extends Seeder
 
             $property = $property->create();
         }
-
     }
 }

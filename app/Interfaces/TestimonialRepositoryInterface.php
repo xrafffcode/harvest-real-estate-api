@@ -8,9 +8,9 @@ interface TestimonialRepositoryInterface
 
     public function getTestimonialById(string $id);
 
-    public function createTestimonial(array $data);
+    public function create(array $data);
 
-    public function updateTestimonial(array $data, string $id);
+    public function update(array $data, string $id);
 
-    public function deleteTestimonial(string $id);
+    public function delete(string $id);
 }

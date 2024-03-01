@@ -12,6 +12,6 @@ class WebConfigurationTableSeeder extends Seeder
      */
     public function run(): void
     {
-        WebConfiguration::factory()->count(5)->create();
+        WebConfiguration::factory()->count(1)->create();
     }
 }

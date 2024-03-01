@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Http\UploadedFile;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\WebConfiguration>
@@ -64,14 +65,13 @@ class WebConfigurationFactory extends Factory
         ];
 
         return [
-            'name' => $web_conf_name[array_rand($web_conf_name)],
+            'title' => $web_conf_name[array_rand($web_conf_name)],
             'description' => fake()->sentence(),
             'email' => fake()->email(),
             'phone' => fake()->phoneNumber(),
-            'logo' => '',
-            'map' => '',
+            'logo' => UploadedFile::fake()->image('logo.jpg'),
+            'map' => fake()->url(),
             'address' => fake()->address(),
-            'theme_color' => '',
             'facebook' => $facebook_usernames[array_rand($facebook_usernames)],
             'instagram' => $instagram_usernames[array_rand($instagram_usernames)],
             'youtube' => $youtube_usernames[array_rand($youtube_usernames)],

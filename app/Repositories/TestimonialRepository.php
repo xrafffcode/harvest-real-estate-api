@@ -17,17 +17,29 @@ class TestimonialRepository implements TestimonialRepositoryInterface
         return Testimonial::find($id);
     }
 
-    public function createTestimonial($data)
+    public function create($data)
     {
-        return Testimonial::create($data);
+        $testimonial = new Testimonial;
+        $testimonial->name = $data['name'];
+        $testimonial->avatar = $data['avatar']->store('assets/testimonials', 'public');
+        $testimonial->testimonial = $data['testimonial'];
+        $testimonial->save();
+
+        return $testimonial;
     }
 
-    public function updateTestimonial($data, $id)
+    public function update($data, $id)
     {
-        return Testimonial::find($id)->update($data);
+        $testimonial = Testimonial::find($id);
+        $testimonial->name = $data['name'];
+        $testimonial->avatar = $data['avatar']->store('assets/testimonials', 'public');
+        $testimonial->testimonial = $data['testimonial'];
+        $testimonial->save();
+
+        return $testimonial;
     }
 
-    public function deleteTestimonial($id)
+    public function delete($id)
     {
         return Testimonial::destroy($id);
     }

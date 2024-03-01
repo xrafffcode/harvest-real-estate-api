@@ -15,4 +15,12 @@ interface AgentRepositoryInterface
     public function updateAgent(array $data, string $id);
 
     public function deleteAgent(string $id);
+
+    public function generateCode(int $tryCount): string;
+
+    public function isUniqueCode(string $code, string $exceptId = null): bool;
+
+    public function generateSlug(string $code, string $name, int $tryCount): string;
+
+    public function isUniqueSlug(string $slug, string $exceptId = null): bool;
 }

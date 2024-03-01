@@ -14,7 +14,7 @@ class UpdatePropertyAmenityRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required', 'max:255', 'string',
+            'name' => 'required|max:255|string',
         ];
     }
 }

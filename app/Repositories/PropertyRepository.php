@@ -3,23 +3,25 @@
 namespace App\Repositories;
 
 use App\Interfaces\PropertyRepositoryInterface;
+use App\Models\FloorPlan;
 use App\Models\Property;
 use App\Models\PropertyImage;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class PropertyRepository implements PropertyRepositoryInterface
 {
-    public function getAllProperties(?string $sortBy = null, ?string $sort = null)
+    public function getAllProperties(string $sortBy = null, string $sort = null)
     {
+        $properties = Property::with(['propertyAmenities', 'propertyCategories', 'propertyTypes', 'propertyImages', 'floorPlans']);
+
         if ($sortBy && $sort) {
-            return Property::orderBy($sortBy, $sort)->get();
+            return $properties->orderBy($sortBy, $sort)->get();
         }
 
-        return Property::orderBy('is_featured', 'desc')->get();
+        return $properties->orderBy('is_featured', 'desc')->get();
     }
 
-    public function getPropertiesByParams(?string $search = null, ?string $city = null, ?string $category = null, ?string $amenities = null, ?string $type = null, ?int $minPrice = null, ?int $maxPrice = null, ?bool $sold = null, ?bool $rented = null)
+    public function getPropertiesByParams(string $search = null, string $city = null, string $category = null, string $amenities = null, string $type = null, int $minPrice = null, int $maxPrice = null, bool $sold = null, bool $rented = null)
     {
         $properties = Property::query();
 
@@ -27,16 +29,16 @@ class PropertyRepository implements PropertyRepositoryInterface
 
             if ($search) {
                 $query->where(function ($subQuery) use ($search) {
-                    $subQuery->where('title', 'like', '%' . $search . '%')
-                        ->orWhere('loc_city', 'like', '%' . $search . '%')
-                        ->orWhere('loc_state', 'like', '%' . $search . '%')
-                        ->orWhere('loc_address', 'like', '%' . $search . '%')
-                        ->orWhere('offer_type', 'like', '%' . $search . '%');
+                    $subQuery->where('title', 'like', '%'.$search.'%')
+                        ->orWhere('loc_city', 'like', '%'.$search.'%')
+                        ->orWhere('loc_state', 'like', '%'.$search.'%')
+                        ->orWhere('loc_address', 'like', '%'.$search.'%')
+                        ->orWhere('offer_type', 'like', '%'.$search.'%');
                 });
             }
 
             if ($city) {
-                $query->where('loc_city', 'like', '%' . $city . '%');
+                $query->where('loc_city', 'like', '%'.$city.'%');
             }
 
             if ($category) {
@@ -51,11 +53,9 @@ class PropertyRepository implements PropertyRepositoryInterface
                 });
             }
 
-
             if ($minPrice >= 0 && $maxPrice > 0) {
                 $query->whereBetween('price', [$minPrice, $maxPrice]);
             }
-
 
             if ($sold) {
                 $query->where('is_sold', $sold);
@@ -73,7 +73,6 @@ class PropertyRepository implements PropertyRepositoryInterface
         return $properties->get();
     }
 
-
     public function getPropertyById($id)
     {
         return Property::find($id);
@@ -89,115 +88,139 @@ class PropertyRepository implements PropertyRepositoryInterface
         return Property::groupBy('loc_city')->select('loc_city', DB::raw('count(*) as total_properties'))->get();
     }
 
-    public function createProperty($data)
+    public function create($data)
     {
+        try {
+            DB::beginTransaction();
 
-        DB::beginTransaction();
+            $property = new Property();
+            $property->title = $data['title'];
+            $property->description = $data['description'];
+            $property->loc_city = $data['loc_city'];
+            $property->loc_latitude = $data['loc_latitude'];
+            $property->loc_longitude = $data['loc_longitude'];
+            $property->loc_address = $data['loc_address'];
+            $property->loc_state = $data['loc_state'];
+            $property->loc_zip = $data['loc_zip'];
+            $property->loc_country = $data['loc_country'];
+            $property->price = $data['price'];
+            $property->agent_id = $data['agent_id'];
+            $property->is_featured = $data['is_featured'];
+            $property->is_active = $data['is_active'];
+            $property->is_sold = $data['is_sold'];
+            $property->is_rented = $data['is_rented'];
+            $property->offer_type = $data['offer_type'];
+            $property->slug = $data['slug'];
+            $property->save();
 
-        $property = Property::create([
-            'title' => $data['title'],
-            'slug' => Str::slug($data['title']),
-            'description' => $data['description'],
-            'loc_city' => $data['loc_city'],
-            'loc_latitude' => $data['loc_latitude'],
-            'loc_longitude' => $data['loc_longitude'],
-            'loc_address' => $data['loc_address'],
-            'loc_state' => $data['loc_state'],
-            'loc_zip' => $data['loc_zip'],
-            'loc_country' => $data['loc_country'],
-            'price' => $data['price'],
-            'agent_id' => $data['agent_id'],
-            'is_featured' => $data['is_featured'],
-        ]);
+            $property->propertyAmenities()->attach($data['property_amenities']);
 
-        $property->propertyAmenities()->attach($data['property_amenities']);
+            $property->propertyCategories()->attach($data['property_categories']);
 
-        $property->propertyCategories()->attach($data['property_categories']);
+            $property->propertyTypes()->attach($data['property_types']);
 
-
-        foreach ($data['property_images'] as $image) {
-            $property->propertyImages()->create([
-                'image' => $image,
-            ]);
-        }
-
-        if (isset($data['property_floor_plans'])) {
-            foreach ($data['property_floor_plans'] as $index => $floorPlan) {
-                $floorPlanData = json_decode($floorPlan, true);
-
-                $newFloorPlan = $property->floorPlans()->create([
-                    'sort' => $floorPlanData['sort'],
-                    'title' => $floorPlanData['title'],
-                ]);
-
-                $image = $data['property_floor_plans_images'][$index];
-                $newFloorPlan->update(['image' => $image->store('assets/properties/floor_plans', 'public')]);
+            if (isset($data['property_images'])) {
+                foreach ($data['property_images'] as $image) {
+                    $propertyImage = new PropertyImage();
+                    $propertyImage->property_id = $property->id;
+                    $propertyImage->image = $image['image']->store('assets/properties/images', 'public');
+                    $propertyImage->save();
+                }
             }
+
+            if (isset($data['property_floor_plans'])) {
+                foreach ($data['property_floor_plans'] as $floorPlan) {
+                    $propertyFloorPlan = new FloorPlan();
+                    $propertyFloorPlan->property_id = $property->id;
+                    $propertyFloorPlan->sort = $floorPlan['sort'];
+                    $propertyFloorPlan->title = $floorPlan['title'];
+                    $propertyFloorPlan->image = $floorPlan['image']->store('assets/properties/floor_plans', 'public');
+                    $propertyFloorPlan->save();
+                }
+            }
+
+            DB::commit();
+
+            return $property;
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            throw new \Exception($e->getMessage());
         }
-
-        DB::commit();
-
-        return $property;
     }
 
-    public function updateProperty($data, $id)
+    public function update($data, $id)
     {
         DB::beginTransaction();
 
         $property = Property::find($id);
 
-        $property->update([
-            'title' => $data['title'],
-            'slug' => Str::slug($data['title']),
-            'description' => $data['description'],
-            'loc_city' => $data['loc_city'],
-            'loc_latitude' => $data['loc_latitude'],
-            'loc_longitude' => $data['loc_longitude'],
-            'loc_address' => $data['loc_address'],
-            'loc_state' => $data['loc_state'],
-            'loc_zip' => $data['loc_zip'],
-            'loc_country' => $data['loc_country'],
-            'price' => $data['price'],
-            'agent_id' => $data['agent_id'],
-            'is_featured' => $data['is_featured'],
-            'offer_type' => $data['offer_type'],
-        ]);
+        $property->title = $data['title'];
+        $property->description = $data['description'];
+        $property->loc_city = $data['loc_city'];
+        $property->loc_latitude = $data['loc_latitude'];
+        $property->loc_longitude = $data['loc_longitude'];
+        $property->loc_address = $data['loc_address'];
+        $property->loc_state = $data['loc_state'];
+        $property->loc_zip = $data['loc_zip'];
+        $property->loc_country = $data['loc_country'];
+        $property->price = $data['price'];
+        $property->agent_id = $data['agent_id'];
+        $property->is_featured = $data['is_featured'];
+        $property->is_active = $data['is_active'];
+        $property->is_sold = $data['is_sold'];
+        $property->is_rented = $data['is_rented'];
+        $property->offer_type = $data['offer_type'];
+        $property->slug = $data['slug'];
+        $property->save();
 
         $property->propertyAmenities()->sync($data['property_amenities']);
+
         $property->propertyCategories()->sync($data['property_categories']);
 
-        if (isset($data['property_images'])) {
-            foreach ($data['property_images'] as $image) {
-                if (is_uploaded_file($image)) {
-                    $imageFile = $image;
-                    $property->propertyImages()->create([
-                        'image' => $imageFile->store('assets/properties/images', 'public'),
-                    ]);
-                }
+        $property->propertyTypes()->sync($data['property_types']);
+
+        $existingImageIds = collect($property->propertyImages->pluck('id'));
+        $newImageIds = collect($data['property_images'])->pluck('id')->filter();
+        $deletedImageIds = $existingImageIds->diff($newImageIds);
+        $property->propertyImages()->whereIn('id', $deletedImageIds)->delete();
+        foreach ($data['property_images'] as $image) {
+            if ($image['id']) {
+                $propertyImage = PropertyImage::find($image['id']);
+                $propertyImage->image = $image['image']->store('assets/properties/images', 'public');
+                $propertyImage->save();
+            } else {
+                $propertyImage = new PropertyImage();
+                $propertyImage->property_id = $property->id;
+                $propertyImage->image = $image['image']->store('assets/properties/images', 'public');
+                $propertyImage->save();
             }
         }
 
-        if (isset($data['property_floor_plans'])) {
-            foreach ($data['property_floor_plans'] as $index => $floorPlan) {
-                $floorPlanData = json_decode($floorPlan, true);
-
-                $newFloorPlan = $property->floorPlans()->updateOrCreate([
-                    'sort' => $floorPlanData['sort'],
-                    'title' => $floorPlanData['title'],
-                ]);
-
-                if (isset($data['property_floor_plans_images'][$index]) && is_uploaded_file($data['property_floor_plans_images'][$index])) {
-                    $image = $data['property_floor_plans_images'][$index];
-                    $newFloorPlan->update(['image' => $image->store('assets/properties/floor_plans', 'public')]);
-                }
+        $existingFloorPlanIds = collect($property->floorPlans->pluck('id'));
+        $newFloorPlanIds = collect($data['property_floor_plans'])->pluck('id')->filter();
+        $deletedFloorPlanIds = $existingFloorPlanIds->diff($newFloorPlanIds);
+        $property->floorPlans()->whereIn('id', $deletedFloorPlanIds)->delete();
+        foreach ($data['property_floor_plans'] as $floorPlan) {
+            if ($floorPlan['id']) {
+                $propertyFloorPlan = FloorPlan::find($floorPlan['id']);
+                $propertyFloorPlan->sort = $floorPlan['sort'];
+                $propertyFloorPlan->title = $floorPlan['title'];
+                $propertyFloorPlan->image = $floorPlan['image']->store('assets/properties/floor_plans', 'public');
+                $propertyFloorPlan->save();
+            } else {
+                $propertyFloorPlan = new FloorPlan();
+                $propertyFloorPlan->property_id = $property->id;
+                $propertyFloorPlan->sort = $floorPlan['sort'];
+                $propertyFloorPlan->title = $floorPlan['title'];
+                $propertyFloorPlan->image = $floorPlan['image']->store('assets/properties/floor_plans', 'public');
+                $propertyFloorPlan->save();
             }
         }
-
-
 
         DB::commit();
 
-        return $property;
+        return $property->refresh();
     }
 
     public function updateFeaturedProperty($id, $featured)
@@ -245,7 +268,7 @@ class PropertyRepository implements PropertyRepositoryInterface
         return $property;
     }
 
-    public function deleteProperty($id)
+    public function delete($id)
     {
         return Property::destroy($id);
     }

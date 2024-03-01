@@ -19,14 +19,4 @@ class PropertyImage extends Model
     {
         return $this->belongsTo(Property::class);
     }
-
-    public function setImageAttribute($value)
-    {
-        $this->attributes['image'] = $value->store('assets/properties', 'public');
-    }
-
-    public function getImageAttribute($value)
-    {
-        return asset('storage/' . $value);
-    }
 }

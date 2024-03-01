@@ -14,9 +14,16 @@ class UpdatePropertyCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required', 'max:255', 'string',
-            'icon' => 'required', 'max:255', 'string',
-            'slug' => 'required', 'max:255', 'string',
+            'name' => 'required|max:255|string|unique:property_categories,name,'.$this->route('id'),
+            'icon' => 'required|max:255|string',
+            'slug' => 'nullable|max:255|string|unique:property_categories,slug,'.$this->route('id'),
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if (! $this->has('slug')) {
+            $this->merge(['slug' => null]);
+        }
     }
 }

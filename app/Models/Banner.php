@@ -14,14 +14,5 @@ class Banner extends Model
 
     protected $fillable = [
         'image',
-        'title',
-        'description',
     ];
-
-    public function setImageAttribute($value)
-    {
-        if ($value !== "undefined") {
-            $this->attributes['image'] = $value->store('assets/banners', 'public');
-        }
-    }
 }

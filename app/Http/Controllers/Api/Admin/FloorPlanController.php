@@ -37,8 +37,10 @@ class FloorPlanController extends Controller
      */
     public function store(StoreFloorPlanRequest $request)
     {
+        $request = $request->validated();
+
         try {
-            $floorPlans = $this->floorPlanRepository->createFloorPlan($request->all());
+            $floorPlans = $this->floorPlanRepository->create($request);
 
             return ResponseHelper::jsonResponse(true, 'Floor Plans created successfully', new FloorPlanResource($floorPlans), 201);
         } catch (\Exception $e) {
@@ -69,10 +71,12 @@ class FloorPlanController extends Controller
      */
     public function update(UpdateFloorPlanRequest $request, string $id)
     {
-        try {
-            $floorPlans = $this->floorPlanRepository->updateFloorPlan($request->all(), $id);
+        $request = $request->validated();
 
-            return ResponseHelper::jsonResponse(true, 'Floor Plans updated successfully', FloorPlanResource::collection($floorPlans), 200);
+        try {
+            $floorPlans = $this->floorPlanRepository->update($request, $id);
+
+            return ResponseHelper::jsonResponse(true, 'Floor Plans updated successfully', new FloorPlanResource($floorPlans), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), [], 500);
         }
@@ -84,7 +88,7 @@ class FloorPlanController extends Controller
     public function destroy(string $id)
     {
         try {
-            $this->floorPlanRepository->deleteFloorPlan($id);
+            $this->floorPlanRepository->delete($id);
 
             return ResponseHelper::jsonResponse(true, 'Floor Plans deleted successfully', [], 200);
         } catch (\Exception $e) {

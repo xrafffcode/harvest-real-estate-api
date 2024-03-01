@@ -17,17 +17,31 @@ class FloorPlanRepository implements FloorPlanRepositoryInterface
         return FloorPlan::find($id);
     }
 
-    public function createFloorPlan($data)
+    public function create($data)
     {
-        return FloorPlan::create($data);
+        $floorPlan = new FloorPlan;
+        $floorPlan->property_id = $data['property_id'];
+        $floorPlan->sort = $data['sort'];
+        $floorPlan->title = $data['title'];
+        $floorPlan->image = $data['image']->store('assets/floor-plans', 'public');
+        $floorPlan->save();
+
+        return $floorPlan;
     }
 
-    public function updateFloorPlan($data, $id)
+    public function update($data, $id)
     {
-        return FloorPlan::find($id)->update($data);
+        $floorPlan = FloorPlan::find($id);
+        $floorPlan->property_id = $data['property_id'];
+        $floorPlan->sort = $data['sort'];
+        $floorPlan->title = $data['title'];
+        $floorPlan->image = $data['image']->store('assets/floor-plans', 'public');
+        $floorPlan->save();
+
+        return $floorPlan;
     }
 
-    public function deleteFloorPlan($id)
+    public function delete($id)
     {
         return FloorPlan::destroy($id);
     }

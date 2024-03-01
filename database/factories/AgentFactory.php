@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Http\UploadedFile;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Agent>
@@ -18,7 +19,6 @@ class AgentFactory extends Factory
     {
         return [
             'name' => $this->faker->name(),
-            'slug' => $this->faker->slug(),
             'code' => $this->faker->randomNumber(),
             'description' => $this->faker->text(),
             'specialization' => $this->faker->text(),
@@ -28,6 +28,8 @@ class AgentFactory extends Factory
             'twitter' => $this->faker->url(),
             'instagram' => $this->faker->url(),
             'linkedin' => $this->faker->url(),
+            'avatar' => UploadedFile::fake()->image('avatar.jpg'),
+            'slug' => $this->faker->slug(),
         ];
     }
 }

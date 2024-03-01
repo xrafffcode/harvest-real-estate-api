@@ -17,7 +17,8 @@ class TestimonialResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'avatar_url' => $this->avatar ? asset('storage/' . $this->avatar) : asset('images/avatar.jpg'),
+            'avatar' => $this->avatar,
+            'avatar_url' => $this->avatar ? asset('storage/'.$this->avatar) : asset('images/avatar.jpg'),
             'testimonial' => $this->testimonial,
         ];
     }

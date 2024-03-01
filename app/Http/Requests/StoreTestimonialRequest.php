@@ -2,10 +2,7 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Str;
 
 class StoreTestimonialRequest extends FormRequest
 {
@@ -18,6 +15,7 @@ class StoreTestimonialRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'testimonial' => 'required|string',
         ];
     }

@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Interfaces\PropertyTypeRepositoryInterface;
 use App\Models\PropertyType;
+use Illuminate\Support\Str;
 
 class PropertyTypeRepository implements PropertyTypeRepositoryInterface
 {
@@ -12,9 +13,14 @@ class PropertyTypeRepository implements PropertyTypeRepositoryInterface
         return PropertyType::all();
     }
 
-    public function createPropertyType(array $data)
+    public function create(array $data)
     {
-        return PropertyType::create($data);
+        $propertyType = new PropertyType;
+        $propertyType->name = $data['name'];
+        $propertyType->slug = $data['slug'];
+        $propertyType->save();
+
+        return $propertyType;
     }
 
     public function getPropertyTypeById(string $id)
@@ -22,13 +28,44 @@ class PropertyTypeRepository implements PropertyTypeRepositoryInterface
         return PropertyType::findOrFail($id);
     }
 
-    public function updatePropertyType(array $data, string $id)
+    public function update(array $data, string $id)
     {
-        return $this->getPropertyTypeById($id)->update($data);
+        $propertyType = $this->getPropertyTypeById($id);
+        $propertyType->name = $data['name'];
+        $propertyType->slug = $data['slug'];
+        $propertyType->save();
+
+        return $propertyType;
     }
 
-    public function deletePropertyType(string $id)
+    public function delete(string $id)
     {
         return $this->getPropertyTypeById($id)->delete();
+    }
+
+    public function generateSlug(string $name, int $tryCount): string
+    {
+        $slug = Str::slug($name);
+
+        if ($tryCount > 0) {
+            $slug = $slug.'_'.$tryCount;
+        }
+
+        return $slug;
+    }
+
+    public function isUniqueSlug(string $slug, string $exceptId = null): bool
+    {
+        if (PropertyType::count() === 0) {
+            return true;
+        }
+
+        $query = PropertyType::where('slug', $slug);
+
+        if ($exceptId) {
+            $query->where('id', '!=', $exceptId);
+        }
+
+        return $query->count() === 0;
     }
 }

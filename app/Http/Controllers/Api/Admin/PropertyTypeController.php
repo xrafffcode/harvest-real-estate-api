@@ -5,11 +5,9 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePropertyTypeRequest;
-use App\Http\Requests\UpdatePropertyRequest;
 use App\Http\Requests\UpdatePropertyTypeRequest;
 use App\Http\Resources\PropertyTypeResource;
 use App\Interfaces\PropertyTypeRepositoryInterface;
-use Illuminate\Http\Request;
 
 class PropertyTypeController extends Controller
 {
@@ -42,8 +40,20 @@ class PropertyTypeController extends Controller
      */
     public function store(StorePropertyTypeRequest $request)
     {
+        $request = $request->validated();
+
+        $slug = $request['slug'];
+        if ($request['slug'] == '') {
+            $tryCount = 1;
+            do {
+                $slug = $this->propertyTypeRepository->generateSlug($request['name'], $tryCount);
+                $tryCount++;
+            } while (! $this->propertyTypeRepository->isUniqueSlug($slug));
+            $request['slug'] = $slug;
+        }
+
         try {
-            $propertyType = $this->propertyTypeRepository->createPropertyType($request->validated());
+            $propertyType = $this->propertyTypeRepository->create($request);
 
             return ResponseHelper::jsonResponse(true, 'Property type created successfully', new PropertyTypeResource($propertyType), 201);
         } catch (\Exception $e) {
@@ -70,10 +80,22 @@ class PropertyTypeController extends Controller
      */
     public function update(UpdatePropertyTypeRequest $request, string $id)
     {
-        try {
-            $propertyType = $this->propertyTypeRepository->updatePropertyType($request->validated(), $id);
+        $request = $request->validated();
 
-            return ResponseHelper::jsonResponse(true, 'Property type updated successfully', [], 200);
+        $slug = $request['slug'];
+        if ($request['slug'] == '') {
+            $tryCount = 1;
+            do {
+                $slug = $this->propertyTypeRepository->generateSlug($request['name'], $tryCount);
+                $tryCount++;
+            } while (! $this->propertyTypeRepository->isUniqueSlug($slug, $id));
+            $request['slug'] = $slug;
+        }
+
+        try {
+            $propertyType = $this->propertyTypeRepository->update($request, $id);
+
+            return ResponseHelper::jsonResponse(true, 'Property type updated successfully', new PropertyTypeResource($propertyType), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), [], 500);
         }
@@ -85,7 +107,7 @@ class PropertyTypeController extends Controller
     public function destroy(string $id)
     {
         try {
-            $this->propertyTypeRepository->deletePropertyType($id);
+            $this->propertyTypeRepository->delete($id);
 
             return ResponseHelper::jsonResponse(true, 'Property type deleted successfully', [], 200);
         } catch (\Exception $e) {

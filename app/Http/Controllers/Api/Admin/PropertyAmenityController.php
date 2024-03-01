@@ -37,10 +37,12 @@ class PropertyAmenityController extends Controller
      */
     public function store(StorePropertyAmenityRequest $request)
     {
-        try {
-            $propertyAmenities = $this->propertyAmenitiesRepository->createPropertyAmenity($request->all());
+        $request = $request->validated();
 
-            return ResponseHelper::jsonResponse(true, 'Property Amenities created successfully', new PropertyAmenityResource($propertyAmenities), 201);
+        try {
+            $propertyAmenitiy = $this->propertyAmenitiesRepository->create($request);
+
+            return ResponseHelper::jsonResponse(true, 'Property Amenities created successfully', new PropertyAmenityResource($propertyAmenitiy), 201);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), [], 500);
         }
@@ -54,7 +56,7 @@ class PropertyAmenityController extends Controller
         try {
             $propertyAmenities = $this->propertyAmenitiesRepository->getPropertyAmenityById($id);
 
-            if (!$propertyAmenities) {
+            if (! $propertyAmenities) {
                 return ResponseHelper::jsonResponse(false, 'PropertyAmenity not found', [], 404);
             }
 
@@ -69,10 +71,12 @@ class PropertyAmenityController extends Controller
      */
     public function update(UpdatePropertyAmenityRequest $request, string $id)
     {
-        try {
-            $this->propertyAmenitiesRepository->updatePropertyAmenity($request->all(), $id);
+        $request = $request->validated();
 
-            return ResponseHelper::jsonResponse(true, 'Property Amenities updated successfully', [], 200);
+        try {
+            $propertyAmenity = $this->propertyAmenitiesRepository->update($request, $id);
+
+            return ResponseHelper::jsonResponse(true, 'Property Amenities updated successfully', new PropertyAmenityResource($propertyAmenity), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), [], 500);
         }
@@ -84,7 +88,7 @@ class PropertyAmenityController extends Controller
     public function destroy(string $id)
     {
         try {
-            $propertyAmenities = $this->propertyAmenitiesRepository->deletePropertyAmenity($id);
+            $this->propertyAmenitiesRepository->delete($id);
 
             return ResponseHelper::jsonResponse(true, 'Property Amenities deleted successfully', [], 200);
         } catch (\Exception $e) {

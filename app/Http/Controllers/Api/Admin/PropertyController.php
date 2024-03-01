@@ -44,6 +44,21 @@ class PropertyController extends Controller
         }
     }
 
+    public function getPropertyBySlug(string $slug)
+    {
+        try {
+            $property = $this->propertyRepository->getPropertyBySlug($slug);
+
+            if (! $property) {
+                return ResponseHelper::jsonResponse(false, 'Property not found', [], 404);
+            }
+
+            return ResponseHelper::jsonResponse(true, 'Property retrieved successfully', new PropertyResource($property), 200);
+        } catch (\Exception $e) {
+            return ResponseHelper::jsonResponse(false, $e->getMessage(), [], 500);
+        }
+    }
+
     public function getPropertyCities()
     {
         try {
@@ -60,10 +75,12 @@ class PropertyController extends Controller
      */
     public function store(StorePropertyRequest $request)
     {
-        try {
-            $properties = $this->propertyRepository->createProperty($request->all());
+        $request = $request->validated();
 
-            return ResponseHelper::jsonResponse(true, 'Properties created successfully', new PropertyResource($properties), 201);
+        try {
+            $property = $this->propertyRepository->create($request);
+
+            return ResponseHelper::jsonResponse(true, 'Property created successfully', new PropertyResource($property), 201);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), [], 500);
         }
@@ -77,7 +94,7 @@ class PropertyController extends Controller
         try {
             $property = $this->propertyRepository->getPropertyById($id);
 
-            if (!$property) {
+            if (! $property) {
                 return ResponseHelper::jsonResponse(false, 'Property not found', [], 404);
             }
 
@@ -92,10 +109,12 @@ class PropertyController extends Controller
      */
     public function update(UpdatePropertyRequest $request, string $id)
     {
-        try {
-            $properties = $this->propertyRepository->updateProperty($request->all(), $id);
+        $request = $request->validated();
 
-            return ResponseHelper::jsonResponse(true, 'Properties updated successfully', [], 200);
+        try {
+            $property = $this->propertyRepository->update($request, $id);
+
+            return ResponseHelper::jsonResponse(true, 'Property updated successfully', new PropertyResource($property), 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), [], 500);
         }
@@ -145,31 +164,15 @@ class PropertyController extends Controller
         }
     }
 
-
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
         try {
-            $this->propertyRepository->deleteProperty($id);
+            $this->propertyRepository->delete($id);
 
-            return ResponseHelper::jsonResponse(true, 'Properties deleted successfully', [], 200);
-        } catch (\Exception $e) {
-            return ResponseHelper::jsonResponse(false, $e->getMessage(), [], 500);
-        }
-    }
-
-    public function getPropertyBySlug(string $slug)
-    {
-        try {
-            $property = $this->propertyRepository->getPropertyBySlug($slug);
-
-            if (!$property) {
-                return ResponseHelper::jsonResponse(false, 'Property not found', [], 404);
-            }
-
-            return ResponseHelper::jsonResponse(true, 'Property retrieved successfully', new PropertyResource($property), 200);
+            return ResponseHelper::jsonResponse(true, 'Property deleted successfully', [], 200);
         } catch (\Exception $e) {
             return ResponseHelper::jsonResponse(false, $e->getMessage(), [], 500);
         }
